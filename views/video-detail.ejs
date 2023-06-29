@@ -126,15 +126,19 @@
 
       // 시간 기록 보내기 위함.
       function sendWatchTime() {
-        var username = "user's username";  // 실제 username으로 바꿔야 함
-        var watchTime = elapsedTime / 1000;  // milliseconds to seconds
-
+        var watchTime = Math.floor(elapsedTime / 1000);  // milliseconds to seconds
         fetch('/watchTime', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ username, time: watchTime }),
+          body: JSON.stringify({ time: watchTime }),
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+        }).catch(error => {
+          console.error('Error:', error);
         });
       }
     </script>

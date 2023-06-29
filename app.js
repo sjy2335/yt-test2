@@ -8,7 +8,7 @@ const app = express();
 // 웹페이지의 라우트(경로)를 정의하는 파일을 불러옴
 const defaultRoutes = require("./routes/default");
 const videosRoutes = require("./routes/video");
-const analysisRoutes = require("./routes/analysis");
+
 
 // ejs 템플릿(html에 자바스크립트 문법을 사용할 수 있는 파일)을 쉽게 가져오기 위한 코드
 app.set("view engine", "ejs");
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 // 라우트 사용하는 미들웨어 함수, url에 http://localhost:8080/경로 에 따라 렌더링되는 페이지가 달라짐
 app.use("/", defaultRoutes);
 app.use("/", videosRoutes);
-app.use("/", analysisRoutes);
+
 
 // 클라이언트에서 문제가 발생했을 때 404오류 창을 띄움
 app.use(function (req, res) {
