@@ -127,6 +127,7 @@
       // 시간 기록 보내기 위함.
       function sendWatchTime() {
         var watchTime = Math.floor(elapsedTime / 1000);  // milliseconds to seconds
+        console.log("time: ", watchTime);
         fetch('/watchTime', {
           method: 'POST',
           headers: {

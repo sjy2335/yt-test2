@@ -4,6 +4,8 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require('cookie-parser');  // 쿠키 처리 미들웨어를 추가합니다.
 const app = express();
+const bodyParser = require('body-parser');
+
 
 // 웹페이지의 라우트(경로)를 정의하는 파일을 불러옴
 const defaultRoutes = require("./routes/default");
@@ -20,6 +22,8 @@ app.use(cookieParser());  // Express 앱이 쿠키를 파싱하도록 설정합�
 // public 폴더 안의 데이터들을 구체적인 경로 지정 없이도 가져올 수 있게 함
 // "../public/styles/style.css" 이렇게 불러오지 않고 "/styles/style.css" 이렇게 불러오는게 가능
 app.use(express.static("public"));
+
+app.use(bodyParser.json());
 
 // 쿠키를 설정하는 미들웨어
 app.use((req, res, next) => {

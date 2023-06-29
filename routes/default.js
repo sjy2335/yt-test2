@@ -81,7 +81,7 @@ router.post('/watchTime', (req, res) => {
       }
 
       // 시청 시간 추가
-      todayWatchTime.time += time;
+      todayWatchTime.time = time;
 
       // 다시 JSON으로 변환하고 파일에 저장
       fs.writeFile(jsonPath, JSON.stringify(database, null, 2), (err) => {
