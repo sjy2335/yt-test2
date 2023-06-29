@@ -59,6 +59,18 @@ router.get("/end", function (req, res) {
   res.render("end");
 });
 
+router.get('/watchTime', (req, res) => {
+  fs.readFile('watchTime.json', 'utf8', (err, data) => {
+    if (err) {
+      console.log(err); // 에러 로깅
+      res.json({ time: 0 }); // 기본값 반환
+    } else {
+      res.json(JSON.parse(data));
+    }
+  });
+});
+
+
 router.post('/watchTime', (req, res) => {
   const time  = req.body.time;
   console.log('Received Time: ', time);

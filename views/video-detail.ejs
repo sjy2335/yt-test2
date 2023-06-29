@@ -65,10 +65,24 @@
       }
 
       function onPlayerReady(event) {
-        event.target.playVideo();
-        startTime = Date.now(); // 비디오 시작 시간 설정
-        startTimer(); // 타이머 시작
+        fetch('/watchTime')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.watchTime && data.watchTime.length > 0 && typeof data.watchTime[0].time === 'number') {
+            elapsedTime = data.watchTime[0].time * 1000;  // seconds to milliseconds
+          } else {
+            elapsedTime = 0; // 기본값 설정
+          }
+          
+          event.target.playVideo();
+          startTimer(); // 타이머 시작
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
       }
+      
+      
 
       function onPlayerStateChange(event) {
         if (event.data == YT.PlayerState.PAUSED) {
@@ -127,7 +141,7 @@
       // 시간 기록 보내기 위함.
       function sendWatchTime() {
         var watchTime = Math.floor(elapsedTime / 1000);  // milliseconds to seconds
-        console.log("time: ", watchTime);
+        console.log("time: ",watchTime);
         fetch('/watchTime', {
           method: 'POST',
           headers: {
