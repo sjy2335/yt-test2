@@ -1,0 +1,142 @@
+<!-- 영상 시청화면을 나타내는 html 파일 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>유튜브 중독방지 웹서비스</title>
+    <link rel="stylesheet" href="/styles/sidebar.css" />
+    <script
+      src="https://kit.fontawesome.com/510fbf9652.js"
+      crossorigin="anonymous"
+      defer
+    ></script>
+    <style>
+      #timer {
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('includes/sidebar') %>
+    <!-- 유튜브 영상을 띄우는 코드 -->
+    <!-- 1. 영상이 노출될 영역을 확보한다. 
+    	 api가 제대로 작동하면 <div>에 자동으로 <iframe> 태그가 load될 것 이다. -->
+    <div id="player"></div>
+
+    <!-- 시간 표시를 위한 공간 -->
+    <div id="timer">Time Left:</div>
+
+    <script>
+      // 2. 이 코드는 Iframe Player API를 비동기적으로 로드한다. !!필수!!
+      var tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      // 3. API 코드를 다운로드 받은 다음에 <iframe>을 생성하는 기능 (youtube player도 더불어)
+      var player;
+      var timerInterval; // 타이머 인터벌 변수
+      var timeLimit = 10; // 시간 제한을 10분으로 설정 (10분 = 600초)
+      var startTime; // 비디오 시작 시간
+      var elapsedTime = 0; // 비디오 재생 시간
+
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player("player", {
+          height: "360", // 변경 가능 - 영상 높이
+          width: "640", // 변경 가능 - 영상 너비
+          videoId: "M7lc1UVf-VE", // 변경 - 영상 ID
+          playerVars: {
+            rel: 0, // 연관 동영상 표시 여부 (0: 표시 안 함)
+            controls: 1, // 플레이어 컨트롤러 표시 여부 (0: 표시 안 함)
+            autoplay: 1, // 자동 재생 여부 (1: 자동 재생 함, mute와 함께 설정)
+            loop: 1, // 반복 재생 여부 (1: 반복 재생 함)
+            playsinline: 1, // iOS 환경에서 전체 화면으로 재생하지 않게
+            playlist: "<%= video %>",
+          },
+          events: {
+            onReady: onPlayerReady, // onReady 상태일 때 작동하는 function 이름
+            onStateChange: onPlayerStateChange, // onStateChange 상태일 때 작동하는 function 이름
+          },
+        });
+      }
+
+      function onPlayerReady(event) {
+        event.target.playVideo();
+        startTime = Date.now(); // 비디오 시작 시간 설정
+        startTimer(); // 타이머 시작
+      }
+
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PAUSED) {
+          elapsedTime += Date.now() - startTime; // 비디오 일시정지 시간 누적
+          stopTimer(); // 타이머 정지
+
+          // 시간 기록
+          sendWatchTime(); // 시청 시간 서버에 전송
+
+        } else if (event.data == YT.PlayerState.PLAYING) {
+          startTime = Date.now(); // 비디오 재생 시간 재설정
+          startTimer(); // 타이머 시작
+        }
+      }
+
+      function startTimer() {
+        clearInterval(timerInterval); // 기존의 타이머 인터벌 제거
+
+        var timeLeft = timeLimit - Math.floor(elapsedTime / 1000); // 남은 시간 계산
+        var timerElement = document.getElementById("timer");
+
+        timerElement.textContent = "Time Left: " + formatTime(timeLeft); // 초기 시간 표시
+
+        timerInterval = setInterval(function () {
+          if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+            timeLeft =
+              timeLimit -
+              Math.floor((elapsedTime + Date.now() - startTime) / 1000);
+            timerElement.textContent = "Time Left: " + formatTime(timeLeft);
+
+            if (timeLeft <= 0) {
+              clearInterval(timerInterval);
+              timerElement.textContent = "Time's up!";
+              // 시간 종료 시 원하는 동작 추가
+            }
+          }
+        }, 1000); // 1초마다 타이머 실행
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval); // 타이머 정지
+      }
+
+      // 시간을 분:초 형식으로 변환하는 함수
+      function formatTime(time) {
+        var minutes = Math.floor(time / 60);
+        var seconds = time % 60;
+
+        return (
+          minutes.toString().padStart(2, "0") +
+          ":" +
+          seconds.toString().padStart(2, "0")
+        );
+      }
+
+      // 시간 기록 보내기 위함.
+      function sendWatchTime() {
+        var username = "user's username";  // 실제 username으로 바꿔야 함
+        var watchTime = elapsedTime / 1000;  // milliseconds to seconds
+
+        fetch('/watchTime', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, time: watchTime }),
+        });
+      }
+    </script>
+  </body>
+</html>
