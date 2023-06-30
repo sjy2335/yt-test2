@@ -109,3 +109,7 @@ body {
 .selected p {
   color: #fff;
 }
+
+.bar-today {
+  background-color: #b63154; /* 원하는 붉은 색으로 설정 */
+}
