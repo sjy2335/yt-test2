@@ -45,6 +45,11 @@
   align-items: center; /* 세로축 중앙 정렬 */
 }
 
+.bar-chart--text{
+  width: 50vw;
+  overflow: auto;
+}
+
 *,
 *:before,
 *:after {

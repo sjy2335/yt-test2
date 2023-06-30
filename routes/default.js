@@ -62,7 +62,7 @@ router.get("/analysis", async function (req, res) {
 
     const watchTimeFormatted = formatTime(todayWatchTime.time);
 
-    res.render("analysis", { watchTime: watchTimeFormatted });
+    res.render("analysis", { watchTime: watchTimeFormatted, wholeData: database.watchTime});
   } catch (error) {
     console.error("Error:", error);
     res.render("error");
