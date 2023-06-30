@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --ignore /watchTime.json app.js"
+    "start": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",

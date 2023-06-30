@@ -13,10 +13,8 @@ const jsonPath = path.resolve('./watchTime.json');
 const { scrapeRecommendedVideos } = require("../public/scripts/scraper");
 
 function formatTime(timeInSeconds) {
-  const hours = Math.floor(timeInSeconds / 3600);
-  const minutes = Math.floor((timeInSeconds % 3600) / 60);
-  const seconds = timeInSeconds % 60;
-  return `${hours}hr ${minutes}min ${seconds}sec`;
+  const hours = (timeInSeconds / 3600).toFixed(2);  // round to 2 decimal place
+  return hours;
 }
 
 // 로그인 창 렌더링, url이 http://localhost:8080/ 일 때 렌더링 됨
@@ -41,11 +39,28 @@ router.get("/home", async (req, res) => {
 
 router.get("/analysis", async function (req, res) {
   try {
-    const data = fs.readFileSync(path.join(__dirname, '../watchTime.json'), 'utf8');
-    const watchTimeData = JSON.parse(data);
-    const watchTime = watchTimeData.watchTime;
+    const currentDate = new Date().toISOString().split('T')[0];  // get current date
 
-    const watchTimeFormatted = formatTime(watchTime);
+    // JSON 파일 동기적으로 읽기
+    let data;
+    try {
+      data = fs.readFileSync(jsonPath, 'utf8');
+    } catch (err) {
+      console.log(`Error reading file from disk: ${err}`);
+    }
+
+    // 파싱하여 JavaScript 객체로 변환
+    const database = JSON.parse(data);
+
+    // 오늘의 시청 시간이 이미 있는지 확인
+    let todayWatchTime = database.watchTime.find(wt => wt.date === currentDate);
+    if (!todayWatchTime) {
+      // 오늘의 시청 시간이 없으면 새 항목을 추가합니다.
+      todayWatchTime = { date: currentDate, time: 0 };
+      database.watchTime.push(todayWatchTime);
+    }
+
+    const watchTimeFormatted = formatTime(todayWatchTime.time);
 
     res.render("analysis", { watchTime: watchTimeFormatted });
   } catch (error) {
@@ -53,6 +68,7 @@ router.get("/analysis", async function (req, res) {
     res.render("error");
   }
 });
+
 
 // 시간종료 창 렌더링, url이 http://localhost:8080/end 일 때 렌더링 됨
 router.get("/end", function (req, res) {
