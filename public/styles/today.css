@@ -46,7 +46,8 @@
 }
 
 .bar-chart--text{
-  width: 50vw;
+  width: 20vw;
+  text-align: center;
   overflow: auto;
 }
 
